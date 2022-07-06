@@ -5,15 +5,23 @@ class FrontEnd:
     def __init__(self, master):
         self.master = master
         
+#HEADER#
         self.frame_header = ttk.Frame(self.master)
         self.frame_header.pack()
+        self.logo = PhotoImage(file='pythongif.gif').subsample(3, 3)
+        print(self.logo)
+        ttk.Label(self.frame_header, image=self.logo).grid(
+            row=0, column=0, rowspan=2)
         
         ttk.Label(self.frame_header, text='Welcome to the Image Editor App!').grid(
-            row=0, column=0)
+            row=0, column=1)
         
         ttk.Label(self.frame_header, text='Upload, edit and save your images Easily!').grid(
-            row=1, column=0)
+            row=1, column=1)
+        
+#END HEADER#
 
+## MAIN MENU ##
         self.frame_menu = ttk.Frame(self.master)
         self.frame_menu.pack()
         self.frame_menu.config(relief=RIDGE, padding=(50, 15))
@@ -69,6 +77,7 @@ class FrontEnd:
         pass
     def adjust_action(self):
         pass
+## MAIN MENU ##
         
     
     
