@@ -304,19 +304,37 @@ class FrontEnd:
         self.display_image(self.filtered_image)
     ## BLUR/SMOOTHENING ##
     
+    ## ROTATE SUB BUTTONS ##
     def rotate_left_action(self):
-        pass
+        self.filtered_image = cv2.rotate(
+            self.edited_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        self.display_image(self.filtered_image)
+        
     def rotate_right_action(self):
-        pass
+        self.filtered_image = cv2.rotate(
+            self.edited_image, cv2.ROTATE_90_CLOCKWISE)
+        self.display_image(self.filtered_image)
+        
     def vertical_action(self):
-        pass
+        self.filtered_image = cv2.flip(self.edited_image, 0)
+        self.display_image(self.filtered_image)
+        
     def horizontal_action(self):
-        pass
+        self.filtered_image = cv2.flip(self.edited_image, 2)
+        self.display_image(self.filtered_image)
+    ## ROTATE SUB BUTTONS ##
     
-    def brightness_action(self):
-        pass
-    def saturation_action(self):
-        pass
+    ## BRIGHTNESS/SATURATION SUBFILTER SLIDERS ##
+    def brightness_action(self, value):
+        self.filtered_image = cv2.convertScaleAbs(
+            self.edited_image, alpha=self.brightness_slider.get())
+        self.display_image(self.filtered_image)
+        
+    def saturation_action(self, event):
+        self.filtered_image = cv2.convertScaleAbs(
+            self.edited_image, alpha=1, beta=self.saturation_slider.get())
+        self.display_image(self.filtered_image)
+    ## BRIGHTNESS/SATURATION SUBFILTER SLIDERS ##
     
     def display_image(self, image=None):  ## Function will remove old canvas ##
         self.canvas.delete("all")
