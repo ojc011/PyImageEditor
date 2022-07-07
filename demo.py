@@ -1,4 +1,6 @@
-from tkinter import ttk, Tk, PhotoImage, RIDGE, Canvas, GROOVE, Scale, HORIZONTAL
+from tkinter import ttk, Tk, PhotoImage, RIDGE, Canvas, GROOVE, Scale, HORIZONTAL, filedialog
+import cv2
+from PIL import Image, ImageTk
 
 
 class FrontEnd:
@@ -6,6 +8,8 @@ class FrontEnd:
         self.master = master
         
 #HEADER#
+        self.master.geometry('750x550+250+10') ##Determines Size of Window##
+        self.master.title('Image Editor App with Tkinter and OpenCV') ##Title of app, similar to that of an html tab##
         self.frame_header = ttk.Frame(self.master)
         self.frame_header.pack()
         self.logo = PhotoImage(file='pythongif.gif').subsample(5, 5)
@@ -81,7 +85,7 @@ class FrontEnd:
         self.canvas = Canvas(self.frame_menu, bg="gray", width=300, height=400)
         self.canvas.grid(row=0, column=1, rowspan=10)
         
-## Canvas for image display ##
+## Canvas for image display end##
         
 ##FOOTER MENU END##
 
@@ -100,9 +104,16 @@ class FrontEnd:
         self.side_frame.grid(row=0, column=2, rowspan=10)
         self.side_frame.config(relief=GROOVE, padding=(50, 15))
         
-    def upload_action(self):
-        self.refresh_side_frame()
-        ttk.Label(self.side_frame, text="Please Upload an Image").grid(row=0,column=0)
+    def upload_action(self): ## Will open file explorer to upload picture ##
+        self.canvas.delete("all")
+        
+        self.filename = filedialog.askopenfilename()
+        self.original_image = cv2.imread(self.filename)
+        
+        self.edited_image = cv2.imread(self.filename)
+        self.filtered_image = cv2.imread(self.filename)
+        
+        self.display_image(self.edited_image) ##Edited image will be saved here
         
     def text_action_1(self):
         self.refresh_side_frame()
@@ -252,6 +263,40 @@ class FrontEnd:
         pass
     def saturation_action(self):
         pass
+    
+    def display_image(self, image=None):
+        self.canvas.delete("all")
+        if image is None:
+            image = self.edited_image.copy()
+        else:
+            image = image 
+        
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        height, width, channels = image.shape
+        ratio = height / width
+        
+        new_width = width
+        new_height = height
+        
+        if height > 400 or width > 300: ## conditional to resize image if it is larger than specified ##
+            if ratio < 1:
+                new_width = 300
+                new_height = int(new_width * ratio)
+            else:
+                new_height = 400
+                new_width = int(new_height * (width / height))
+                
+        self.ratio = height / new_height
+    
+        self.new_image = cv2.resize(image, (new_width, new_height))
+        
+        self.new_image = ImageTk.PhotoImage(
+            Image.fromarray(self.new_image))
+        
+        self.canvas.config(width=new_width, height=new_height)
+        self.canvas.create_image(
+            new_width / 2, new_height / 2, image=self.new_image)
+        
     
     
 root = Tk()
