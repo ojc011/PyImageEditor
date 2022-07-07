@@ -156,21 +156,21 @@ class FrontEnd:
             self.side_frame, text="Averaging Blur").grid(row=0, column=2, padx=5, pady=5, sticky='sw')
         
         self.average_slider = Scale(
-            self.side_frame, from_=0, to=256, orient=HORIZONTAL, command=self.averaging_action)
+            self.side_frame, from_=0, to=50, orient=HORIZONTAL, command=self.averaging_action)
         self.average_slider.grid(row=1, column=2, padx=5, sticky='sw')
         
         ttk.Label(
             self.side_frame, text="Gaussian Blur").grid(row=2, column=2, padx=5, pady=5, sticky='sw')
         
         self.gaussian_slider = Scale(
-            self.side_frame, from_=0, to=256, orient=HORIZONTAL, command=self.gaussian_action)
+            self.side_frame, from_=0, to=50, orient=HORIZONTAL, command=self.gaussian_action)
         self.gaussian_slider.grid(row=3, column=2, padx=5, sticky='sw')
         
         ttk.Label(
             self.side_frame, text="Median Blur").grid(row=4, column=2, padx=5, pady=5, sticky='sw')
         
         self.median_slider = Scale(
-            self.side_frame, from_=0, to=256, orient=HORIZONTAL, command=self.median_action)
+            self.side_frame, from_=0, to=50, orient=HORIZONTAL, command=self.median_action)
         self.median_slider.grid(row=5, column=2, padx=5, pady=5, sticky='sw')
     ## BLUR MENU OPTIONS END ##
     
@@ -280,13 +280,29 @@ class FrontEnd:
         self.display_image(self.filtered_image)
     ## APPLY FILTER FUNCTIONS TO ADD EFFECTS ##
     
-    
-    def averaging_action(self):
-        pass
-    def median_action(self):
-        pass
-    def gaussian_action(self):
-        pass
+    ## BLUR/SMOOTHENING ##
+    def averaging_action(self, value):
+        value = int(value)
+        if value % 2 == 0:
+            value += 1
+        self.filtered_image = cv2.blur(self.edited_image, (value, value))
+        self.display_image(self.filtered_image)
+        
+    def median_action(self, value):
+        value = int(value)
+        if value % 2 == 0:
+            value += 1
+            self.filtered_image = cv2.medianBlur(self.edited_image, value)
+            self.display_image(self.filtered_image)
+            
+    def gaussian_action(self, value):
+        value = int(value)
+        if value % 2 == 0:
+            value += 1
+        self.filtered_image = cv2.GaussianBlur(
+            self.edited_image, (value, value), 0)
+        self.display_image(self.filtered_image)
+    ## BLUR/SMOOTHENING ##
     
     def rotate_left_action(self):
         pass
