@@ -1,6 +1,7 @@
 from tkinter import ttk, Tk, PhotoImage, RIDGE, Canvas, GROOVE, Scale, HORIZONTAL, filedialog
 import cv2
 from PIL import Image, ImageTk
+import numpy as np
 
 
 class FrontEnd:
@@ -108,8 +109,8 @@ class FrontEnd:
         self.canvas.delete("all")
         
         self.filename = filedialog.askopenfilename()
-        self.original_image = cv2.imread(self.filename)
         
+        self.original_image = cv2.imread(self.filename)
         self.edited_image = cv2.imread(self.filename)
         self.filtered_image = cv2.imread(self.filename)
         
@@ -223,25 +224,62 @@ class FrontEnd:
         pass
     def revert_action(self):
         pass
-
+    
+    ## APPLY FILTER FUNCTIONS TO ADD EFFECTS ##
     def negative_action(self):
-        pass
+        self.filtered_image = cv2.bitwise_not(self.edited_image)
+        self.display_image(self.filtered_image)
+        
     def bw_action(self):
-        pass
+        self.filtered_image = cv2.cvtColor(
+            self.edited_image, cv2.COLOR_BGR2GRAY)
+        self.filtered_image = cv2.cvtColor(
+            self.filtered_image, cv2.COLOR_GRAY2BGR)
+        self.display_image(self.filtered_image)
+        
     def sepia_action(self):
-        pass
+        kernel = np.array([[0.272, 0.534, 0.131],
+                            [0.349, 0.686, 0.168],
+                            [0.393, 0.769, 0.189]])
+        
+        self.filtered_image = cv2.filter2D(self.original_image, -1, kernel)
+        self.display_image(self.filtered_image)
+    
     def sketch_action(self):
-        pass
+        ret, self.filtered_image = cv2.pencilSketch(
+            self.edited_image, sigma_s=60, sigma_r=0.5, shade_factor=0.02)
+        self.display_image(self.filtered_image)
+    
     def stylisation_action(self):
-        pass
+        self.filtered_image = cv2.stylization(
+            self.edited_image, sigma_s=150, sigma_r=0.25)
+        self.display_image(self.filtered_image)
+        
     def emb_action(self):
-        pass
+        kernel = np.array([[0, -1, -1],
+                           [1, 0, -1],
+                           [1, 1, 0]])
+        self.filtered_image = cv2.filter2D(self.original_image, -1, kernel)
+        self.display_image(self.filtered_image)
+        
     def erosion_action(self):
-        pass
+        kernel = np.ones((5, 5), np.uint8)
+        self.filtered_image = cv2.erode(
+            self.edited_image, kernel, iterations=1)
+        self.display_image(self.filtered_image)
+    
     def dilation_action(self):
-        pass
+        kernel = np.ones((5, 5), np.uint8)
+        self.filtered_image = cv2.dilate(
+            self.edited_image, kernel, iterations=1)
+        self.display_image(self.filtered_image)
+    
     def binary_threshold_action(self):
-        pass
+        ret, self.filtered_image = cv2.threshold(
+            self.edited_image, 127, 255, cv2.THRESH_BINARY)
+        self.display_image(self.filtered_image)
+    ## APPLY FILTER FUNCTIONS TO ADD EFFECTS ##
+    
     
     def averaging_action(self):
         pass
@@ -264,14 +302,15 @@ class FrontEnd:
     def saturation_action(self):
         pass
     
-    def display_image(self, image=None):
+    def display_image(self, image=None):  ## Function will remove old canvas ##
         self.canvas.delete("all")
-        if image is None:
+        
+        if image is None: ## Will show previously edited image if image is not passed ##
             image = self.edited_image.copy()
         else:
             image = image 
         
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) ## coverts BGR color scheme into RGB to render properly ##
         height, width, channels = image.shape
         ratio = height / width
         
