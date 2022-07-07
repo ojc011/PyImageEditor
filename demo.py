@@ -218,12 +218,18 @@ class FrontEnd:
         self.saturation_slider.set(0)
     ## ADJUST ACTION END ##
     
+    ## APPLY/CANCEL/REVERT ACTIONS ##
     def apply_action(self):
-        pass
+        self.edited_image = self.filtered_image
+        self.display_image(self.edited_image)
+        
     def cancel_action(self):
-        pass
+        self.display_image(self.edited_image)
+        
     def revert_action(self):
-        pass
+        self.edited_image = self.original_image.copy()
+        self.display_image(self.original_image)
+     ## APPLY/CANCEL/REVERT ACTIONS ##
     
     ## APPLY FILTER FUNCTIONS TO ADD EFFECTS ##
     def negative_action(self):
@@ -307,20 +313,20 @@ class FrontEnd:
     ## ROTATE SUB BUTTONS ##
     def rotate_left_action(self):
         self.filtered_image = cv2.rotate(
-            self.edited_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            self.filtered_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         self.display_image(self.filtered_image)
         
     def rotate_right_action(self):
         self.filtered_image = cv2.rotate(
-            self.edited_image, cv2.ROTATE_90_CLOCKWISE)
+            self.filtered_image, cv2.ROTATE_90_CLOCKWISE)
         self.display_image(self.filtered_image)
         
     def vertical_action(self):
-        self.filtered_image = cv2.flip(self.edited_image, 0)
+        self.filtered_image = cv2.flip(self.filtered_image, 0)
         self.display_image(self.filtered_image)
         
     def horizontal_action(self):
-        self.filtered_image = cv2.flip(self.edited_image, 2)
+        self.filtered_image = cv2.flip(self.filtered_image, 2)
         self.display_image(self.filtered_image)
     ## ROTATE SUB BUTTONS ##
     
