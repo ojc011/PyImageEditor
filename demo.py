@@ -9,7 +9,7 @@ class FrontEnd:
         self.master = master
         
 #HEADER#
-        self.master.geometry('750x550+250+10') ##Determines Size of Window##
+        self.master.geometry('750x650+250+10') ##Determines Size of Window##
         self.master.title('Image Editor App with Tkinter and OpenCV') ##Title of app, similar to that of an html tab##
         self.frame_header = ttk.Frame(self.master)
         self.frame_header.pack()
@@ -115,44 +115,21 @@ class FrontEnd:
         self.filtered_image = cv2.imread(self.filename)
         
         self.display_image(self.edited_image) ##Edited image will be saved here
-        
+       
+    
     def text_action_1(self):
+        self.text_extracted = "Sample Txt"
         self.refresh_side_frame()
-        ttk.Label(self.side_frame, text="Please enter text").grid(row=0,column=0)
+        ttk.Label(
+            self.side_frame, text="Enter the text").grid(row=0, column=2, padx=5, pady=5, sticky='sw')
+        self.text_on_image = ttk.Entry(self.side_frame)
+        self.text_on_image.grid(row=1, column=2, padx=5, pady=5, sticky='sw')
+        ttk.Button(
+            self.side_frame, text="Pick a Font Color", command=self.choose_color).grid(
+                row=2, column=2, padx=5, pady=5, sticky='sw')
+        self.text_action() 
         
-    def draw_action(self):
-        self.color_code = ((255, 0, 0), '#ff0000')
-        self.refresh_side_frame()
-        
-        self.canvas.bind("<ButtonPress>", self.start_draw)
-        self.canvas.bind("<B1-Motion>", self.draw)
-        
-        self.draw_color_button = ttk.Button(
-            self.side_frame, text="Pick A Color", command=self.choose_color)
-        self.draw_color_button.grid(
-            row=0, column=2, padx=5, pady=5, sticky='sw')
-        
-    def choose_color(self):
-        self.color_code = colorchooser.askcolor(title="Choose color")
-        
-    def start_draw(self, event):
-        self.x = event.x
-        self.y = event.y
-        self.draw_ids = []
-        
-    def draw(self, event):
-        print(self.draw_ids)
-        self.draw_ids.append(self.canvas.create_line(self.x, self.y, event.x, event.y, width=2,
-                                                     fill=self.color_code[-1], capstyle=ROUND, smooth=True))
-        
-        cv2.line(self.filtered_image, (int(self.x * self.ratio), int(self.y * self.ratio)),
-                 (int(event.x * self.ratio), int(event.y * self.ratio)),
-                 (0, 0, 255), thickness=int(self.ratio * 2),
-                 lineType=8)
-        
-        self.x = event.x
-        self.y = event.y
-        
+    ## CROP FUNCTIONS ##    
     def crop_action(self):
         self.rectangle_id = 0
         # self.ratio = 0
@@ -204,7 +181,86 @@ class FrontEnd:
         y = slice(start_y, end_y, 1)
         
         self.filtered_image = self.edited_image[y, x]
+        self.display_image(self.filtered_image)  
+    
+    def text_action(self):
+        self.rectangle_id = 0
+        # self.ratio = 0
+        self.crop_start_x = 0
+        self.crop_start_y = 0
+        self.crop_end_x = 0
+        self.crop_end_y = 0
+        self.canvas.bind("<ButtonPress>", self.start_crop)
+        self.canvas.bind("<B1-Motion>", self.crop)
+        self.canvas.bind("<ButtonRelease>", self.end_text_crop)
+        
+    def end_text_crop(self, event):
+        if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+            start_x = int(self.crop_start_x * self.ratio)
+            start_y = int(self.crop_start_y * self.ratio)
+            end_x = int(self.crop_end_x * self.ratio)
+            end_y = int(self.crop_end_y * self.ratio)
+        elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+            start_x = int(self.crop_end_x * self.ratio)
+            start_y = int(self.crop_start_y * self.ratio)
+            end_x = int(self.crop_start_x * self.ratio)
+            end_y = int(self.crop_end_y * self.ratio)
+        elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
+            start_x = int(self.crop_start_x * self.ratio)
+            start_y = int(self.crop_end_y * self.ratio)
+            end_x = int(self.crop_end_x * self.ratio)
+            end_y = int(self.crop_start_y * self.ratio)
+        else:
+            start_x = int(self.crop_end_x * self.ratio)
+            start_y = int(self.crop_end_y * self.ratio)
+            end_x = int(self.crop_start_x * self.ratio)
+            end_y = int(self.crop_start_y * self.ratio)
+        if self.text_on_image.get():
+            self.text_extracted = self.text_on_image.get()
+        start_font = start_x, start_y
+        print(self.color_code)
+        r, g, b = tuple(map(int, self.color_code[0]))
+        
+        self.filtered_image = cv2.putText(
+            self.edited_image, self.text_extracted, start_font, cv2.FONT_HERSHEY_SIMPLEX, 2, (b, g, r), 5)
         self.display_image(self.filtered_image)
+        
+    ## CROP FUNCTIONS ## 
+        
+## DRAW FUNCTIONS ##    
+    def draw_action(self):
+        self.color_code = ((255, 0, 0), '#ff0000')
+        self.refresh_side_frame()
+        
+        self.canvas.bind("<ButtonPress>", self.start_draw)
+        self.canvas.bind("<B1-Motion>", self.draw)
+        
+        self.draw_color_button = ttk.Button(
+            self.side_frame, text="Pick A Color", command=self.choose_color)
+        self.draw_color_button.grid(
+            row=0, column=2, padx=5, pady=5, sticky='sw')
+        
+    def choose_color(self):
+        self.color_code = colorchooser.askcolor(title="Choose color")
+        
+    def start_draw(self, event):
+        self.x = event.x
+        self.y = event.y
+        self.draw_ids = []
+        
+    def draw(self, event):
+        print(self.draw_ids)
+        self.draw_ids.append(self.canvas.create_line(self.x, self.y, event.x, event.y, width=2,
+                                                     fill=self.color_code[-1], capstyle=ROUND, smooth=True))
+        
+        cv2.line(self.filtered_image, (int(self.x * self.ratio), int(self.y * self.ratio)),
+                 (int(event.x * self.ratio), int(event.y * self.ratio)),
+                 (0, 0, 255), thickness=int(self.ratio * 2),
+                 lineType=8)
+        
+        self.x = event.x
+        self.y = event.y
+    ## DRAW FUNCTIONS ##
     
     ## FILTER MENU OPTIONS ##
     def filter_action(self):
@@ -278,7 +334,13 @@ class FrontEnd:
     ##FLIP ACTION END ##
     
     def save_action(self):
-        pass
+        original_file_type = self.filename.split('.')[-1]
+        filename = filedialog.asksaveasfilename()
+        filename = filename + "." + original_file_type
+        
+        save_as_image = self.edited_image
+        cv2.imwrite(filename, save_as_image)
+        self.filename = filename
     
     ## ADJUST ACTION ##
     def adjust_action(self):
